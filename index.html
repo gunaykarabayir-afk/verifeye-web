@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifeye | Erişim Kontrolü</title>
+    <title>Verifeye | Amazon Ürün Doğrulama</title>
     <style>
         body {
             background-color: #050505;
@@ -17,74 +17,118 @@
             margin: 0;
             overflow: hidden;
         }
-        /* Tarama Çizgisi */
-        .scan-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: rgba(0, 255, 204, 0.1);
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
-            animation: moveScan 4s linear infinite;
-        }
-        @keyframes moveScan {
-            0% { top: -5%; }
-            100% { top: 105%; }
-        }
-        .content {
-            z-index: 10;
-            text-align: center;
+        .terminal {
             width: 90%;
+            max-width: 650px;
+            background: rgba(0, 10, 10, 0.9);
+            padding: 25px;
+            border: 1px solid #004433;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.1);
+            position: relative;
         }
-        /* Üst Yazı */
-        .label {
-            margin-bottom: 40px;
-            letter-spacing: 8px;
-            font-size: 1.5rem; /* Yazı büyütüldü */
-            font-weight: bold;
-            color: #00ffcc;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.7); /* Parlama eklendi */
+        #output {
+            height: 200px;
+            overflow-y: hidden;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #00ccaa;
         }
-        /* Giriş Alanı */
+        .input-box {
+            border-top: 1px solid #111;
+            padding-top: 15px;
+        }
         input {
             background: transparent;
             border: none;
-            border-bottom: 2px solid #00ffcc;
-            color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 2rem; /* Giriş metni büyütüldü */
-            text-align: center;
-            outline: none;
-            padding: 15px;
+            color: #fff;
             width: 100%;
-            max-width: 600px;
-            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
         }
-        input:focus {
-            border-bottom: 2px solid #ffffff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-        }
-        /* Placeholder rengi */
-        ::placeholder {
-            color: #333;
-            font-size: 1.2rem;
+        .highlight { color: #fff; font-weight: bold; }
+        .danger { color: #ff3333; }
+        .success { color: #00ffcc; }
+        
+        /* Analiz Animasyonu */
+        #scanner {
+            display: none;
+            height: 2px;
+            background: #00ffcc;
+            position: absolute;
+            width: 100%;
+            left: 0;
+            z-index: 100;
+            box-shadow: 0 0 15px #00ffcc;
         }
     </style>
 </head>
 <body>
-    <div class="scan-line"></div>
-    <div class="content">
-        <div class="label">SİSTEM ERİŞİMİ İÇİN DOĞRULAYIN</div>
-        <input type="text" placeholder="Gördüğün her şeye inanır mısın?" id="ans" autocomplete="off">
+    <div id="scanner"></div>
+    <div class="terminal">
+        <div id="output">
+            > VERIFEYE E-TICARET ANALIZ MODÜLÜ AKTIF...<br>
+            > Amazon API bağlantısı bekleniyor.<br>
+            > Lütfen analiz edilecek ürün linkini giriniz.
+        </div>
+        <div class="input-box">
+            <span class="success">verifeye@admin:~$</span>
+            <input type="text" id="target" placeholder="https://www.amazon.com.tr/dp/..." autocomplete="off">
+        </div>
     </div>
+
     <script>
-        document.getElementById('ans').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                alert('VERİ ANALİZ EDİLİYOR... ERİŞİM REDDEDİLDİ.');
-                this.value = '';
+        const target = document.getElementById('target');
+        const output = document.getElementById('output');
+        const scanner = document.getElementById('scanner');
+
+        const process = [
+            "> [INFO] Link algılandı: Amazon.com.tr kaynaklı veri okunuyor...",
+            "> [SYSTEM] Ürün görselleri (High-Res) sunucuya indirildi.",
+            "> [AI] Görsel manipülasyon taraması başlatıldı...",
+            "> [AI] <span class='highlight'>Piksel analizi:</span> Gölgeler ve yansımalar tutarlı değil!",
+            "> [NLP] 1,420 kullanıcı yorumu saniyeler içinde tarandı.",
+            "> [NLP] <span class='highlight'>Anomali tespiti:</span> Yorumların %68'i bot karakteristiği taşıyor.",
+            "> [DATA] Satıcı 'Global-Tech' kara liste taraması yapılıyor...",
+            "> [RESULT] <span class='danger'>DIKKAT:</span> Bu ürün %82 olasılıkla yanıltıcı görsel içermektedir."
+        ];
+
+        target.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && this.value !== "") {
+                this.disabled = true;
+                runShow();
             }
         });
+
+        function runShow() {
+            let i = 0;
+            scanner.style.display = 'block';
+            
+            // Tarama çizgisi animasyonu
+            let scanAnim = setInterval(() => {
+                let top = Math.random() * 100;
+                scanner.style.top = top + "%";
+            }, 100);
+
+            let logAnim = setInterval(() => {
+                if (i < process.length) {
+                    output.innerHTML += "<br>" + process[i];
+                    output.scrollTop = output.scrollHeight;
+                    i++;
+                } else {
+                    clearInterval(logAnim);
+                    clearInterval(scanAnim);
+                    scanner.style.display = 'none';
+                    output.innerHTML += "<br><br><span class='danger' style='font-size:1.2rem'>[ANALIZ TAMAMLANDI: ÜRÜN GÜVENILIR DEĞIL]</span>";
+                    
+                    setTimeout(() => {
+                        alert("Verifeye Raporu: Bu ürün reklam görselleri ile gerçekliği arasında ciddi farklar tespit edilmiştir.");
+                        location.reload();
+                    }, 3000);
+                }
+            }, 1200);
+        }
     </script>
 </body>
 </html>

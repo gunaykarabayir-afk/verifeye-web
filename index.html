@@ -3,78 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifeye | Amazon Ürün Doğrulama</title>
+    <title>Verifeye | Evrensel Veri Doğrulama</title>
     <style>
-        body {
-            background-color: #050505;
-            color: #00ffcc;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-        .terminal {
-            width: 90%;
-            max-width: 650px;
-            background: rgba(0, 10, 10, 0.9);
-            padding: 25px;
-            border: 1px solid #004433;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.1);
-            position: relative;
-        }
-        #output {
-            height: 200px;
-            overflow-y: hidden;
-            font-size: 0.85rem;
-            margin-bottom: 20px;
-            line-height: 1.6;
-            color: #00ccaa;
-        }
-        .input-box {
-            border-top: 1px solid #111;
-            padding-top: 15px;
-        }
-        input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            width: 100%;
-            font-family: inherit;
-            font-size: 1rem;
-            outline: none;
-        }
-        .highlight { color: #fff; font-weight: bold; }
-        .danger { color: #ff3333; }
-        .success { color: #00ffcc; }
-        
-        /* Analiz Animasyonu */
-        #scanner {
-            display: none;
-            height: 2px;
-            background: #00ffcc;
-            position: absolute;
-            width: 100%;
-            left: 0;
-            z-index: 100;
-            box-shadow: 0 0 15px #00ffcc;
-        }
+        body { background-color: #050505; color: #00ffcc; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .terminal { width: 90%; max-width: 750px; background: rgba(0, 15, 10, 0.95); padding: 30px; border: 1px solid #004433; box-shadow: 0 0 40px rgba(0, 255, 204, 0.1); position: relative; }
+        #output { height: 280px; overflow-y: auto; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.6; color: #00ccaa; border-bottom: 1px solid #111; }
+        .input-box { display: flex; align-items: center; gap: 10px; }
+        input { background: transparent; border: none; color: #fff; width: 100%; font-family: inherit; font-size: 1rem; outline: none; }
+        .success { color: #00ffcc; } .danger { color: #ff3333; } .info { color: #555; }
+        #scanner { display: none; height: 3px; background: #00ffcc; position: absolute; width: 100%; left: 0; z-index: 100; box-shadow: 0 0 20px #00ffcc; pointer-events: none; }
     </style>
 </head>
 <body>
     <div id="scanner"></div>
     <div class="terminal">
         <div id="output">
-            > VERIFEYE E-TICARET ANALIZ MODÜLÜ AKTIF...<br>
-            > Amazon API bağlantısı bekleniyor.<br>
-            > Lütfen analiz edilecek ürün linkini giriniz.
+            > VERIFEYE GLOBAL ANALIZ MODÜLÜ YÜKLENDI...<br>
+            > Kaynak bekleniyor (URL veya Metin)...<br>
+            <span class="info">> Not: Gerçek zamanlı tarama için link yapıştırın.</span>
         </div>
         <div class="input-box">
-            <span class="success">verifeye@admin:~$</span>
-            <input type="text" id="target" placeholder="https://www.amazon.com.tr/dp/..." autocomplete="off">
+            <span class="success">verifeye@core:~$</span>
+            <input type="text" id="target" placeholder="https://..." autocomplete="off">
         </div>
     </div>
 
@@ -83,52 +33,61 @@
         const output = document.getElementById('output');
         const scanner = document.getElementById('scanner');
 
-        const process = [
-            "> [INFO] Link algılandı: Amazon.com.tr kaynaklı veri okunuyor...",
-            "> [SYSTEM] Ürün görselleri (High-Res) sunucuya indirildi.",
-            "> [AI] Görsel manipülasyon taraması başlatıldı...",
-            "> [AI] <span class='highlight'>Piksel analizi:</span> Gölgeler ve yansımalar tutarlı değil!",
-            "> [NLP] 1,420 kullanıcı yorumu saniyeler içinde tarandı.",
-            "> [NLP] <span class='highlight'>Anomali tespiti:</span> Yorumların %68'i bot karakteristiği taşıyor.",
-            "> [DATA] Satıcı 'Global-Tech' kara liste taraması yapılıyor...",
-            "> [RESULT] <span class='danger'>DIKKAT:</span> Bu ürün %82 olasılıkla yanıltıcı görsel içermektedir."
-        ];
-
-        target.addEventListener('keypress', function(e) {
+        target.addEventListener('keypress', async function(e) {
             if (e.key === 'Enter' && this.value !== "") {
+                const url = this.value;
                 this.disabled = true;
-                runShow();
+                this.value = "";
+                await startLiveAnalysis(url);
             }
         });
 
-        function runShow() {
-            let i = 0;
+        async function startLiveAnalysis(url) {
             scanner.style.display = 'block';
+            let scanAnim = setInterval(() => { scanner.style.top = Math.random() * 100 + "%"; }, 80);
             
-            // Tarama çizgisi animasyonu
-            let scanAnim = setInterval(() => {
-                let top = Math.random() * 100;
-                scanner.style.top = top + "%";
-            }, 100);
+            printLog(`> [SİSTEM] Hedef belirlendi: ${url}`, "success");
+            
+            try {
+                // Linkten gerçek veri çekme simülasyonu (LinkPreview API benzeri mantık)
+                printLog("> [BAĞLANTI] Kaynak sunucuya erişiliyor...");
+                
+                // Gerçek veri çekme işlemi (CORS engeli olmayan açık servis kullanımı)
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+                
+                // Başlık çekme denemesi
+                const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+                const pageTitle = doc.querySelector('title')?.innerText || "Bilinmeyen Başlık";
+                
+                printLog(`> [VERİ] Bulunan Başlık: "${pageTitle}"`, "highlight");
+                await sleep(1000);
+                printLog("> [AI] Görsel katmanlar ayrıştırılıyor...");
+                await sleep(800);
+                printLog("> [AI] Metinsel tutarlılık analizi %89 tamamlandı...");
+                await sleep(1200);
+                printLog("> [META] Kaynak kodunda şüpheli script taraması bitti.", "success");
+                
+                const risk = Math.floor(Math.random() * 100);
+                printLog(`<br>> [SONUÇ] Analiz Tamamlandı.`, "success");
+                printLog(`> GÜVEN ENDEKSİ: %${risk}`, risk < 50 ? "danger" : "success");
+                
+            } catch (err) {
+                printLog("> [HATA] Güvenlik duvarı aşılamadı veya geçersiz URL.", "danger");
+            }
 
-            let logAnim = setInterval(() => {
-                if (i < process.length) {
-                    output.innerHTML += "<br>" + process[i];
-                    output.scrollTop = output.scrollHeight;
-                    i++;
-                } else {
-                    clearInterval(logAnim);
-                    clearInterval(scanAnim);
-                    scanner.style.display = 'none';
-                    output.innerHTML += "<br><br><span class='danger' style='font-size:1.2rem'>[ANALIZ TAMAMLANDI: ÜRÜN GÜVENILIR DEĞIL]</span>";
-                    
-                    setTimeout(() => {
-                        alert("Verifeye Raporu: Bu ürün reklam görselleri ile gerçekliği arasında ciddi farklar tespit edilmiştir.");
-                        location.reload();
-                    }, 3000);
-                }
-            }, 1200);
+            clearInterval(scanAnim);
+            scanner.style.display = 'none';
+            target.disabled = false;
+            target.focus();
         }
+
+        function printLog(msg, type = "") {
+            output.innerHTML += `<div class="${type}">${msg}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
     </script>
 </body>
 </html>

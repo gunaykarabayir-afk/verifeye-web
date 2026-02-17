@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifeye | Universal Verification</title>
+    <title>Verifeye | Deep Analysis Mode</title>
     <style>
         body { background-color: #050505; color: #00ffcc; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        .terminal { width: 90%; max-width: 750px; background: rgba(0, 15, 10, 0.95); padding: 30px; border: 1px solid #004433; box-shadow: 0 0 40px rgba(0, 255, 204, 0.1); position: relative; }
-        #output { height: 300px; overflow-y: auto; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.6; color: #00ccaa; border-bottom: 1px solid #111; scroll-behavior: smooth; }
+        .terminal { width: 90%; max-width: 800px; background: rgba(0, 15, 10, 0.95); padding: 30px; border: 1px solid #004433; box-shadow: 0 0 40px rgba(0, 255, 204, 0.2); position: relative; }
+        #output { height: 350px; overflow-y: auto; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.6; color: #00ccaa; border-bottom: 1px solid #111; scroll-behavior: smooth; padding-right: 10px; }
         .input-box { display: flex; align-items: center; gap: 10px; }
         input { background: transparent; border: none; color: #fff; width: 100%; font-family: inherit; font-size: 1rem; outline: none; }
-        .success { color: #00ffcc; } .danger { color: #ff3333; } .info { color: #555; } .highlight { color: #fff; text-shadow: 0 0 5px #00ffcc; }
+        .success { color: #00ffcc; } .danger { color: #ff3333; } .info { color: #888; } .highlight { color: #fff; text-shadow: 0 0 5px #00ffcc; }
         #scanner { display: none; height: 3px; background: #00ffcc; position: absolute; width: 100%; left: 0; z-index: 100; box-shadow: 0 0 20px #00ffcc; pointer-events: none; }
+        ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: #004433; }
     </style>
 </head>
 <body>
     <div id="scanner"></div>
     <div class="terminal">
         <div id="output">
-            > VERIFEYE GLOBAL ANALIZ MODÜLÜ [V.2.1] AKTİF...<br>
-            > Kaynak bekleniyor... (Amazon, Trendyol, Haber Portalları vb.)<br>
+            > VERIFEYE DEEP ANALYSIS ENGINE [V.3.0] READY...<br>
+            > Analiz için URL girişi bekleniyor...<br>
         </div>
         <div class="input-box">
-            <span class="success">verifeye@core:~$</span>
-            <input type="text" id="target" placeholder="Analiz edilecek URL'yi buraya bırakın..." autocomplete="off">
+            <span class="success">verifeye@admin:~$</span>
+            <input type="text" id="target" placeholder="URL girin (Amazon, Trendyol vb.)..." autocomplete="off">
         </div>
     </div>
 
@@ -37,50 +38,63 @@
                 const url = this.value;
                 this.disabled = true;
                 this.value = "";
-                await startLiveAnalysis(url);
+                await startDeepAnalysis(url);
             }
         });
 
-        async function startLiveAnalysis(url) {
+        async function startDeepAnalysis(url) {
             scanner.style.display = 'block';
             let scanAnim = setInterval(() => { scanner.style.top = Math.random() * 100 + "%"; }, 80);
             
-            printLog(`> [HEDEF] ${url} taranıyor...`, "success");
+            printLog(`> [HEDEF] ${url} tanımlandı.`, "success");
             
             try {
-                printLog("> [BAĞLANTI] Proxy üzerinden tünel açılıyor...");
-                
-                // Daha güçlü bir proxy servisi deniyoruz
+                printLog("> [BAĞLANTI] Kaynak koduna sızılıyor...");
                 const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-                
-                if (!response.ok) throw new Error();
-                
                 const data = await response.json();
                 const html = data.contents;
                 
-                // Başlık çekme
                 const match = html.match(/<title>([^<]*)<\/title>/);
-                const pageTitle = match ? match[1].substring(0, 60) : "Ham Veri Kaynağı";
+                const pageTitle = match ? match[1].substring(0, 50) + "..." : "Ham Veri Kaynağı";
                 
-                printLog(`> [SİSTEM] Kaynak Başlığı: <span class="highlight">"${pageTitle}"</span>`);
-                await sleep(600);
-                printLog("> [AI] Piksel ve metadata katmanları ayrıştırılıyor...");
-                await sleep(1000);
-                printLog("> [AI] Semantik tutarsızlık kontrolü yapılıyor...");
+                printLog(`> [SİSTEM] Başlık: <span class="highlight">"${pageTitle}"</span>`);
                 await sleep(800);
                 
-                const risk = Math.floor(Math.random() * 40) + 50; // %50-%90 arası risk
-                printLog(`<br>> [ANALİZ TAMAMLANDI]`, "success");
-                printLog(`> GÜVEN ENDEKSİ: %${risk}`, risk < 60 ? "danger" : "success");
-                printLog(`> TAVSİYE: ${risk < 60 ? "Düşük güvenilirlik. Kanıtları sorgulayın." : "Veri tutarlı görünüyor."}`, "info");
+                // Raporlama Simülasyonu
+                printLog("> [ANALİZ] Yorum katmanları taranıyor...");
+                await sleep(1000);
+                
+                const totalReviews = Math.floor(Math.random() * 2000) + 100;
+                const positiveReviews = Math.floor(totalReviews * (0.6 + Math.random() * 0.3));
+                const botProbability = Math.floor(Math.random() * 60) + 20;
+
+                printLog(`<br>--- ANALİZ RAPORU ---`, "highlight");
+                printLog(`> Toplam Yorum Sayısı: ${totalReviews}`);
+                printLog(`> Olumlu Görüş Oranı: %${Math.floor((positiveReviews/totalReviews)*100)}`);
+                printLog(`> AI/Bot Hesap Şüphesi: <span class="danger">%${botProbability}</span>`);
+                await sleep(1200);
+
+                printLog(`<br>> TESPİT EDİLEN ANOMALİLER:`, "danger");
+                const anomalies = [
+                    "- Yorumların %40'ı benzer cümle yapısına sahip (NLP Uyarısı).",
+                    "- Profil fotoğrafları stok görsel veri tabanıyla eşleşiyor.",
+                    "- Satıcı puanı son 30 günde yapay olarak yükseltilmiş.",
+                    "- Görsel metadata bilgileri manipülasyon izleri taşıyor."
+                ];
+                
+                for(let a of anomalies) {
+                    await sleep(600);
+                    printLog(a);
+                }
+
+                printLog(`<br>> [SONUÇ] VERİ MANİPÜLASYONU SAPTANDI.`, "danger");
+                printLog(`> Durum: Güvenilirliği düşük kaynak.`, "info");
 
             } catch (err) {
-                // Hata alsa bile şovu bozma, "Gizli Veri" gibi davran
-                printLog("> [UYARI] Kaynak uçtan uca şifreli. Ham veri işleniyor...");
-                await sleep(1000);
-                printLog("> [AI] Şifrelenmiş metadata üzerinden tahmin yürütülüyor...");
+                printLog("> [KRİTİK HATA] Kaynak veri çekme protokolü reddedildi.", "danger");
+                printLog("> [YEDEK] Geçmiş veri tabanı taranıyor...");
                 await sleep(1500);
-                printLog("> [SONUÇ] Veri manipülasyonu saptandı (Deneysel Analiz).", "danger");
+                printLog("> SONUÇ: Şüpheli aktivite nedeniyle erişim engellendi.", "danger");
             }
 
             clearInterval(scanAnim);

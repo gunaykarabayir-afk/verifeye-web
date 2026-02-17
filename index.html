@@ -3,77 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifeye | Sentetik Veri Analizi</title>
+    <title>Verifeye | Secure Access</title>
     <style>
         body { background-color: #050505; color: #00ffcc; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        .terminal { width: 90%; max-width: 800px; background: rgba(0, 10, 10, 0.98); padding: 30px; border: 1px solid #004433; box-shadow: 0 0 50px rgba(0, 255, 204, 0.15); position: relative; border-radius: 5px; }
-        #output { height: 400px; overflow-y: auto; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.7; color: #00ccaa; scroll-behavior: smooth; padding-right: 15px; }
+        
+        /* Giriş Ekranı Tasarımı */
+        #login-screen { text-align: center; z-index: 100; }
+        .lock-icon { font-size: 3rem; margin-bottom: 20px; color: #333; }
+        #pass-input { background: transparent; border: none; border-bottom: 2px solid #222; color: #00ffcc; font-size: 1.5rem; text-align: center; outline: none; padding: 10px; width: 300px; letter-spacing: 5px; }
+        #pass-input:focus { border-bottom: 2px solid #00ffcc; }
+
+        /* Terminal Ekranı (Başlangıçta Gizli) */
+        #terminal-screen { display: none; width: 90%; max-width: 800px; }
+        
+        .terminal { background: rgba(0, 10, 10, 0.98); padding: 30px; border: 1px solid #004433; box-shadow: 0 0 50px rgba(0, 255, 204, 0.15); position: relative; }
+        #output { height: 400px; overflow-y: auto; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.7; color: #00ccaa; scroll-behavior: smooth; }
         .input-box { display: flex; align-items: center; gap: 10px; border-top: 1px solid #111; padding-top: 20px; }
-        input { background: transparent; border: none; color: #fff; width: 100%; font-family: inherit; font-size: 1.1rem; outline: none; }
+        .input-box input { background: transparent; border: none; color: #fff; width: 100%; font-family: inherit; font-size: 1.1rem; outline: none; }
+
         .success { color: #00ffcc; font-weight: bold; } 
         .danger { color: #ff4444; font-weight: bold; } 
         .warning { color: #ffcc00; }
         .highlight { color: #ffffff; text-shadow: 0 0 8px #00ffcc; }
+        
         #scanner { display: none; height: 4px; background: #00ffcc; position: absolute; width: 100%; left: 0; z-index: 100; box-shadow: 0 0 25px #00ffcc; pointer-events: none; opacity: 0.6; }
-        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #004433; }
+        
+        /* Glitch Efekti */
+        .glitch { animation: glitch 0.2s linear; }
+        @keyframes glitch {
+            0% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(0); }
+        }
     </style>
 </head>
 <body>
-    <div id="scanner"></div>
-    <div class="terminal">
-        <div id="output">
-            > VERIFEYE CORE V.3.5 [AKTİF]<br>
-            > Derin öğrenme motoru pazar günü konfigürasyonuyla yüklendi.<br>
-            > Analiz edilecek linki veya ürün adını girin...<br>
-        </div>
-        <div class="input-box">
-            <span class="success">admin@verifeye:~$</span>
-            <input type="text" id="target" placeholder="URL veya Ürün Adı giriniz..." autocomplete="off">
+
+    <div id="login-screen">
+        <div class="lock-icon">🔒</div>
+        <div style="letter-spacing: 10px; font-size: 0.7rem; color: #333; margin-bottom: 20px;">RESTRICTED AREA</div>
+        <input type="password" id="pass-input" placeholder="ACCESS CODE" autocomplete="off">
+        <div id="login-msg" style="margin-top: 20px; font-size: 0.8rem; color: #444;">Yetkisiz erişimler loglanmaktadır.</div>
+    </div>
+
+    <div id="terminal-screen">
+        <div id="scanner"></div>
+        <div class="terminal">
+            <div id="output">
+                > VERIFEYE CORE V.3.5 [YETKİ ONAYLANDI]<br>
+                > Analiz motoru hazır...<br>
+            </div>
+            <div class="input-box">
+                <span class="success">admin@verifeye:~$</span>
+                <input type="text" id="target" placeholder="Analiz edilecek URL..." autocomplete="off">
+            </div>
         </div>
     </div>
 
     <script>
+        const loginScreen = document.getElementById('login-screen');
+        const terminalScreen = document.getElementById('terminal-screen');
+        const passInput = document.getElementById('pass-input');
+        const loginMsg = document.getElementById('login-msg');
+        
         const target = document.getElementById('target');
         const output = document.getElementById('output');
         const scanner = document.getElementById('scanner');
 
+        // PAROLA AYARI
+        const MASTER_PASS = "VERIFEYE2026";
+
+        // Giriş Kontrolü
+        passInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (this.value.toUpperCase() === MASTER_PASS) {
+                    document.body.classList.add('glitch');
+                    setTimeout(() => {
+                        loginScreen.style.display = 'none';
+                        terminalScreen.style.display = 'block';
+                        document.body.classList.remove('glitch');
+                        target.focus();
+                    }, 500);
+                } else {
+                    loginMsg.innerText = "ERİŞİM REDDEDİLDİ.";
+                    loginMsg.classList.add('danger');
+                    this.value = "";
+                }
+            }
+        });
+
+        // Analiz Fonksiyonu (Pazar Günü Modu)
         target.addEventListener('keypress', async function(e) {
             if (e.key === 'Enter' && this.value !== "") {
                 const val = this.value;
                 this.disabled = true;
                 this.value = "";
-                await startSundaySpecialAnalysis(val);
+                await startAnalysis(val);
             }
         });
 
-        async function startSundaySpecialAnalysis(val) {
+        async function startAnalysis(val) {
             scanner.style.display = 'block';
             let scanAnim = setInterval(() => { scanner.style.top = Math.random() * 100 + "%"; }, 70);
             
             printLog(`> [BAŞLATILDI] Hedef: ${val}`, "highlight");
             await sleep(1000);
-            printLog("> [ERİŞİM] Kaynak sunucu bypass ediliyor...");
-            await sleep(1200);
             printLog("> [ANALİZ] Yorumlar ve satıcı geçmişi çekiliyor...", "success");
             await sleep(1500);
 
-            // Rastgele ama gerçekçi pazar günü verileri
             const total = Math.floor(Math.random() * 1500) + 450;
-            const positive = Math.floor(total * 0.92); // %92 olumlu (şüpheli durum)
-            const botScore = Math.floor(Math.random() * 30) + 65; // %65-%95 arası bot riski
+            const botScore = Math.floor(Math.random() * 30) + 65;
 
             printLog(`<br><span class='highlight'>[TARAMA SONUÇLARI]</span>`);
             printLog(`> Toplam İncelenen Yorum: ${total}`);
-            printLog(`> Olumlu Geri Bildirim: <span class='success'>%${Math.floor((positive/total)*100)}</span>`);
-            printLog(`> <span class='warning'>Tespit Edilen "Güzelleme" Oranı: %${botScore}</span>`);
+            printLog(`> Tespit Edilen "Güzelleme" Oranı: %${botScore}`);
             await sleep(1000);
 
             printLog(`<br>> [KRİTİK BULGULAR]`, "danger");
             const findings = [
-                "!!! ANALİZ: Yorumların %80'i 'Harika ürün', 'Çok hızlı geldi' gibi kısa ve birbirinin kopyası.",
-                "!!! TESPİT: 24 saat içinde 300+ olumlu yorum girişi saptandı (Organik değil).",
-                "!!! UYARI: Satıcı puanı, silinen negatif yorumlar sayesinde korunuyor.",
-                "!!! RİSK: Ürün görselleri üzerinde aşırı manipülasyon (Photoshop) saptandı."
+                "!!! ANALİZ: Yorumların %80'i kopyalanmış içerik.",
+                "!!! TESPİT: Olağan dışı olumlu yorum girişi.",
+                "!!! UYARI: Negatif geri bildirimler filtrelenmiş.",
+                "!!! RİSK: Görsel manipülasyon saptandı."
             ];
 
             for(let f of findings) {
@@ -81,8 +132,7 @@
                 printLog(f, "warning");
             }
 
-            printLog(`<br>> [FİNAL KARARI]`, "danger");
-            printLog("> BU VERİ KAYNAĞI GÜVENİLİR DEĞİLDİR. MANİPÜLASYON SAPTANDI.", "highlight");
+            printLog(`<br>> [FİNAL KARARI] MANİPÜLASYON SAPTANDI.`, "danger");
 
             clearInterval(scanAnim);
             scanner.style.display = 'none';
